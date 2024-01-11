@@ -33,29 +33,36 @@ def callback(joy_msg: Joy):
    
     joy_j2 = axis_state[1]
     if len(axis_state) >= 1:
-        joy_j2 = joy_msg.axes[0] * 5 + axis_state[1]
+        joy_j2 = joy_msg.axes[0] * 1 + axis_state[1]
     else:
         rospy.logwarn("axis has not length 2")
-    joy_j3 = joy_msg.axes[1] * 5 + axis_state[2]
+    joy_j3 = joy_msg.axes[1] * 1 + axis_state[2]
 
     # Joy 4 as set to RB and LB
     if joy_msg.buttons[4] == 0 and joy_msg.buttons[5] == 0:
         joy_j4 = axis_state[3]
     elif joy_msg.buttons[4] == 1:
-        joy_j4 = axis_state[3] - 5 / 2
+        joy_j4 = axis_state[3] - 1/2
     else:
-        joy_j4 = axis_state[3] + 5 / 2
-
+        joy_j4 = axis_state[3] + 1/2
     # Tool
-    joy_j5 = joy_msg.axes[4] * 5 / 2 + axis_state[4]
-    joy_j6 = joy_msg.axes[3] * 5 / 2 + axis_state[5]
+    joy_j5 = joy_msg.axes[4] * 1/2 + axis_state[4]
+    joy_j6 = joy_msg.axes[3] * 1/2 + axis_state[5]
 
     joints = [joy_j1, joy_j2, joy_j3, joy_j4, joy_j5, joy_j6]
 
     #check for limit
+    limits = robotlimits.get_joint_limits()
+    for i in range(6):
+        if (joints[i] >= limits[joint_names[i]["max_position"]]-2):
+            joints[i] = limits[joint_names[i]["max_position"]]-2
+        if (joints[i] <= limits[joint_names[i]["min_position"]]+2):
+            joints[i] = limits[joint_names[i]["min_position"]]+2
+
+
+
 
     # Publish Data
-    dur = []
     traj = JointTrajectory()
     traj.header.stamp = rospy.Time.now()
     traj.joint_names = joint_names
@@ -63,7 +70,7 @@ def callback(joy_msg: Joy):
     for i in range(6):
         cmd = joints[i]
         point.positions.append(cmd)
-    point.time_from_start = rospy.Duration(2)
+    point.time_from_start = rospy.Duration(5)
     traj.points.append(point)
 
     pubJoint.publish(traj)
