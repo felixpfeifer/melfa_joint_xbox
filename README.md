@@ -1,4 +1,4 @@
-# melfa_teleop
+# Melfa Joints XBOX Packet
 Used to Move the Melfa Robot with a XBOX Controller with all 6 Joints
 # Requirements
 ROS 1 Noetic
